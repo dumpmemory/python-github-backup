@@ -429,12 +429,12 @@ Github Backup Examples
 
 Backup all repositories, including private ones using a classic token::
 
-    export ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    ACCESS_TOKEN=SOME-GITHUB-TOKEN
     github-backup WhiteHouse --token $ACCESS_TOKEN --organization --output-directory /tmp/white-house --repositories --private
 
 Use a fine-grained access token to backup a single organization repository with everything else (wiki, pull requests, comments, issues etc)::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     ORGANIZATION=docker
     REPO=cli
     # e.g. git@github.com:docker/cli.git
@@ -442,14 +442,14 @@ Use a fine-grained access token to backup a single organization repository with 
 
 Quietly and incrementally backup useful Github user data (public and private repos with SSH) including; all issues, pulls, all public starred repos and gists (omitting "hooks", "releases" and therefore "assets" to prevent blocking). *Great for a cron job.* ::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     GH_USER=YOUR-GITHUB-USER
 
     github-backup -f $FINE_ACCESS_TOKEN --prefer-ssh -o ~/github-backup/ -l error -P -i --all-starred --starred --watched --followers --following --issues --issue-comments --issue-events --pulls --pull-comments --pull-reviews --pull-commits --labels --milestones --security-advisories --discussions --repositories --wikis --releases --assets --attachments --pull-details --gists --starred-gists $GH_USER
     
 Debug an error/block or incomplete backup into a temporary directory. Omit "incremental" to fill a previous incomplete backup. ::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     GH_USER=YOUR-GITHUB-USER
 
     github-backup -f $FINE_ACCESS_TOKEN -o /tmp/github-backup/ -l debug -P --all-starred --starred --watched --followers --following --issues --issue-comments --issue-events --pulls --pull-comments --pull-reviews --pull-commits --labels --milestones --discussions --repositories --wikis --releases --assets --pull-details --gists --starred-gists $GH_USER
