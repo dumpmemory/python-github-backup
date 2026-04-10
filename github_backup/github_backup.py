@@ -806,6 +806,7 @@ def retrieve_data(args, template, query_args=None, paginated=True, lazy=False):
                     response = json.loads(http_response.read().decode("utf-8"))
                     break  # Exit retry loop and handle the data returned
                 except (
+                    ConnectionError,
                     IncompleteRead,
                     json.decoder.JSONDecodeError,
                     TimeoutError,
