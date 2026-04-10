@@ -2980,7 +2980,7 @@ def fetch_repository(
     masked_remote_url = mask_password(remote_url)
 
     initialized = subprocess.call(
-        "git ls-remote " + remote_url, stdout=FNULL, stderr=FNULL, shell=True
+        ["git", "ls-remote", remote_url], stdout=FNULL, stderr=FNULL
     )
     if initialized == 128:
         if ".wiki.git" in remote_url:
