@@ -40,7 +40,6 @@ from .graphql_queries import (
     DISCUSSION_REPLIES_QUERY,
 )
 
-FNULL = open(os.devnull, "w")
 FILE_URI_PREFIX = "file://"
 logger = logging.getLogger(__name__)
 
@@ -529,19 +528,18 @@ def get_auth(args, encode=True, for_git_cli=False):
             if platform.system() != "Darwin":
                 raise Exception("Keychain arguments are only supported on Mac OSX")
             try:
-                with open(os.devnull, "w") as devnull:
-                    token = subprocess.check_output(
-                        [
-                            "security",
-                            "find-generic-password",
-                            "-s",
-                            args.osx_keychain_item_name,
-                            "-a",
-                            args.osx_keychain_item_account,
-                            "-w",
-                        ],
-                        stderr=devnull,
-                    ).strip()
+                token = subprocess.check_output(
+                    [
+                        "security",
+                        "find-generic-password",
+                        "-s",
+                        args.osx_keychain_item_name,
+                        "-a",
+                        args.osx_keychain_item_account,
+                        "-w",
+                    ],
+                    stderr=subprocess.DEVNULL,
+                ).strip()
                 token = token.decode("utf-8")
                 auth = token + ":" + "x-oauth-basic"
             except subprocess.SubprocessError:
@@ -2984,7 +2982,8 @@ def fetch_repository(
     masked_remote_url = mask_password(remote_url)
 
     initialized = subprocess.call(
-        ["git", "ls-remote", remote_url], stdout=FNULL, stderr=FNULL
+        ["git", "ls-remote", remote_url],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     if initialized == 128:
         if ".wiki.git" in remote_url:
