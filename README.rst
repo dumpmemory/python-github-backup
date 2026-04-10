@@ -363,7 +363,7 @@ This means any blocking errors on previous runs can cause missing data in backup
 
 Using (``--incremental-by-files``) will request new data from the API **based on when the file was modified on filesystem**. e.g. if you modify the file yourself you may miss something.
 
-Still saver than the previous version.
+Still safer than the previous version.
 
 Specifically, issues and pull requests are handled like this.
 
