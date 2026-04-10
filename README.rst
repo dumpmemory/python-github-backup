@@ -325,7 +325,7 @@ Gotchas / Known-issues
 All is not everything
 ---------------------
 
-The ``--all`` argument does not include: cloning private repos (``-P, --private``), cloning forks (``-F, --fork``), cloning starred repositories (``--all-starred``), ``--pull-details``, cloning LFS repositories (``--lfs``), cloning gists (``--gists``) or cloning starred gist repos (``--starred-gists``). See examples for more.
+The ``--all`` argument does not include: downloading attachments from issue and pull request comments (``--attachments``), cloning private repos (``-P, --private``), cloning forks (``-F, --fork``), cloning starred repositories (``--all-starred``), ``--pull-details``, cloning LFS repositories (``--lfs``), cloning gists (``--gists``) or cloning starred gist repos (``--starred-gists``). See examples for more.
 
 Starred repository size
 -----------------------
