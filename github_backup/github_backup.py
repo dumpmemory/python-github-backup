@@ -1297,7 +1297,7 @@ def get_jwt_signed_url_via_markdown_api(url, token, repo_context):
         request.add_header("Content-Type", "application/json")
         request.add_header("Accept", "application/vnd.github+json")
 
-        html = urlopen(request, timeout=30).read().decode("utf-8")
+        html = urlopen(request, context=https_ctx, timeout=30).read().decode("utf-8")
 
         # Parse JWT-signed URL from HTML response
         # Format: <img src="https://private-user-images.githubusercontent.com/...?jwt=..." ...>
