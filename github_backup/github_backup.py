@@ -1781,7 +1781,7 @@ def get_authenticated_user(args):
 
 def check_git_lfs_install():
     exit_code = subprocess.call(
-        ["git", "lfs", "version"],
+        ["git", "lfs", "version"], stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     if exit_code != 0:
@@ -2982,7 +2982,7 @@ def fetch_repository(
     masked_remote_url = mask_password(remote_url)
 
     initialized = subprocess.call(
-        ["git", "ls-remote", remote_url],
+        ["git", "ls-remote", remote_url], stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     if initialized == 128:
