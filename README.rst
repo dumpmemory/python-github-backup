@@ -365,7 +365,7 @@ Using (``--incremental-by-files``) will request new data from the API **based on
 
 Still safer than the previous version.
 
-Specifically, issues and pull requests are handled like this.
+Incremental backup only changes how issue and pull request data is fetched.
 
 Known blocking errors
 ---------------------
