@@ -22,7 +22,7 @@ Using PIP via PyPI::
 Using PIP via Github (more likely the latest version)::
 
     pip install git+https://github.com/josegonzalez/python-github-backup.git#egg=github-backup
-    
+
 *Install note for python newcomers:*
 
 Python scripts are unlikely to be included in your ``$PATH`` by default, this means it cannot be run directly in terminal with ``$ github-backup ...``, you can either add python's install path to your environments ``$PATH`` or call the script directly e.g. using ``$ ~/.local/bin/github-backup``.*
@@ -249,7 +249,7 @@ Note:  When you run github-backup, you will be asked whether you want to allow "
 Github Rate-limit and Throttling
 --------------------------------
 
-"github-backup" will automatically throttle itself based on feedback from the Github API. 
+"github-backup" will automatically throttle itself based on feedback from the Github API.
 
 Their API is usually rate-limited to 5000 calls per hour. The API will ask github-backup to pause until a specific time when the limit is reset again (at the start of the next hour). This continues until the backup is complete.
 
@@ -446,7 +446,7 @@ Quietly and incrementally backup useful Github user data (public and private rep
     GH_USER=YOUR-GITHUB-USER
 
     github-backup -f $FINE_ACCESS_TOKEN --prefer-ssh -o ~/github-backup/ -l error -P -i --all-starred --starred --watched --followers --following --issues --issue-comments --issue-events --pulls --pull-comments --pull-reviews --pull-commits --labels --milestones --security-advisories --discussions --repositories --wikis --releases --assets --attachments --pull-details --gists --starred-gists $GH_USER
-    
+
 Debug an error/block or incomplete backup into a temporary directory. Omit "incremental" to fill a previous incomplete backup. ::
 
     FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
