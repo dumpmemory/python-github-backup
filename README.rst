@@ -327,6 +327,11 @@ All is not everything
 
 The ``--all`` argument does not include: downloading attachments from issue and pull request comments (``--attachments``), cloning private repos (``-P, --private``), cloning forks (``-F, --fork``), cloning starred repositories (``--all-starred``), ``--pull-details``, cloning LFS repositories (``--lfs``), cloning gists (``--gists``) or cloning starred gist repos (``--starred-gists``). See examples for more.
 
+Saves nothing if no arguments are passed
+----------------------------------------
+
+At least one argument like ``--all`` or ``--repositories`` is needed for github-backup to actually save data. Without relevant arguments, github-backup fetches some data from GitHub but doesn't put any of it into files.
+
 Starred repository size
 -----------------------
 
