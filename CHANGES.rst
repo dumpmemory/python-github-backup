@@ -1,29 +1,163 @@
 Changelog
 =========
 
-Unreleased
-----------
-- Add GitHub Discussions backups via GraphQL, including comments, replies,
-  optional attachment downloads, and per-repository incremental checkpoints.
-- Add pull request review backups with ``--pull-reviews`` and one-time
-  incremental backfill for existing backups.
-- Store incremental ``last_update`` checkpoints per repository resource instead
-  of using one global checkpoint for the whole output directory. Existing
-  backups use the legacy global checkpoint as a migration fallback, and the
-  legacy file is removed once existing issue/pull backups have resource
-  checkpoints (#62).
-- Stop paginating pull requests during incremental backups once the sorted
-  results are at or older than the active checkpoint.
-- Avoid re-fetching discussions and pull requests whose ``updated_at`` exactly
-  matches the active incremental checkpoint.
-- Avoid extra release asset list requests by using asset metadata already
-  included in GitHub's releases response.
-- Add ``--token-from-gh`` to read authentication from ``gh auth token``.
+0.62.0 (2026-04-29)
+-------------------
+------------------------
+- Skip checkpoint-equal incremental items. [Duncan Ogilvie]
+- Avoid redundant release asset list requests. [Duncan Ogilvie]
+- Reduce unnecessary pull requests with incremental fetching. [Duncan
+  Ogilvie]
+- Implement per-resource last_update timestamps. [Duncan Ogilvie]
+
+  Closes #62
+- Add support for pull request reviews. [Duncan Ogilvie]
+
+  Closes #124
+- Add support for discussions. [Duncan Ogilvie]
+
+  Closes #290
+- Add --token-from-gh authentication option. [Duncan Ogilvie]
+- Chore(deps): bump pytest in the python-packages group.
+  [dependabot[bot]]
+
+  Bumps the python-packages group with 1 update: [pytest](https://github.com/pytest-dev/pytest).
+
+
+  Updates `pytest` from 9.0.2 to 9.0.3
+  - [Release notes](https://github.com/pytest-dev/pytest/releases)
+  - [Changelog](https://github.com/pytest-dev/pytest/blob/main/CHANGELOG.rst)
+  - [Commits](https://github.com/pytest-dev/pytest/compare/9.0.2...9.0.3)
+
+  ---
+  updated-dependencies:
+  - dependency-name: pytest
+    dependency-version: 9.0.3
+    dependency-type: direct:production
+    update-type: version-update:semver-patch
+    dependency-group: python-packages
+  ...
+- Chore(deps): bump black in the python-packages group.
+  [dependabot[bot]]
+
+  Bumps the python-packages group with 1 update: [black](https://github.com/psf/black).
+
+
+  Updates `black` from 26.3.0 to 26.3.1
+  - [Release notes](https://github.com/psf/black/releases)
+  - [Changelog](https://github.com/psf/black/blob/main/CHANGES.md)
+  - [Commits](https://github.com/psf/black/compare/26.3.0...26.3.1)
+
+  ---
+  updated-dependencies:
+  - dependency-name: black
+    dependency-version: 26.3.1
+    dependency-type: direct:production
+    update-type: version-update:semver-patch
+    dependency-group: python-packages
+  ...
+- Chore(deps): bump docker/login-action from 3 to 4. [dependabot[bot]]
+
+  Bumps [docker/login-action](https://github.com/docker/login-action) from 3 to 4.
+  - [Release notes](https://github.com/docker/login-action/releases)
+  - [Commits](https://github.com/docker/login-action/compare/v3...v4)
+
+  ---
+  updated-dependencies:
+  - dependency-name: docker/login-action
+    dependency-version: '4'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Chore(deps): bump docker/setup-qemu-action from 3 to 4.
+  [dependabot[bot]]
+
+  Bumps [docker/setup-qemu-action](https://github.com/docker/setup-qemu-action) from 3 to 4.
+  - [Release notes](https://github.com/docker/setup-qemu-action/releases)
+  - [Commits](https://github.com/docker/setup-qemu-action/compare/v3...v4)
+
+  ---
+  updated-dependencies:
+  - dependency-name: docker/setup-qemu-action
+    dependency-version: '4'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Chore(deps): bump docker/build-push-action from 6 to 7.
+  [dependabot[bot]]
+
+  Bumps [docker/build-push-action](https://github.com/docker/build-push-action) from 6 to 7.
+  - [Release notes](https://github.com/docker/build-push-action/releases)
+  - [Commits](https://github.com/docker/build-push-action/compare/v6...v7)
+
+  ---
+  updated-dependencies:
+  - dependency-name: docker/build-push-action
+    dependency-version: '7'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Chore(deps): bump docker/setup-buildx-action from 3 to 4.
+  [dependabot[bot]]
+
+  Bumps [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action) from 3 to 4.
+  - [Release notes](https://github.com/docker/setup-buildx-action/releases)
+  - [Commits](https://github.com/docker/setup-buildx-action/compare/v3...v4)
+
+  ---
+  updated-dependencies:
+  - dependency-name: docker/setup-buildx-action
+    dependency-version: '4'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Chore(deps): bump docker/metadata-action from 5 to 6.
+  [dependabot[bot]]
+
+  Bumps [docker/metadata-action](https://github.com/docker/metadata-action) from 5 to 6.
+  - [Release notes](https://github.com/docker/metadata-action/releases)
+  - [Commits](https://github.com/docker/metadata-action/compare/v5...v6)
+
+  ---
+  updated-dependencies:
+  - dependency-name: docker/metadata-action
+    dependency-version: '6'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Chore(deps): bump the python-packages group with 2 updates.
+  [dependabot[bot]]
+
+  Bumps the python-packages group with 2 updates: [black](https://github.com/psf/black) and [setuptools](https://github.com/pypa/setuptools).
+
+
+  Updates `black` from 26.1.0 to 26.3.0
+  - [Release notes](https://github.com/psf/black/releases)
+  - [Changelog](https://github.com/psf/black/blob/main/CHANGES.md)
+  - [Commits](https://github.com/psf/black/compare/26.1.0...26.3.0)
+
+  Updates `setuptools` from 82.0.0 to 82.0.1
+  - [Release notes](https://github.com/pypa/setuptools/releases)
+  - [Changelog](https://github.com/pypa/setuptools/blob/main/NEWS.rst)
+  - [Commits](https://github.com/pypa/setuptools/compare/v82.0.0...v82.0.1)
+
+  ---
+  updated-dependencies:
+  - dependency-name: black
+    dependency-version: 26.3.0
+    dependency-type: direct:production
+    update-type: version-update:semver-minor
+    dependency-group: python-packages
+  - dependency-name: setuptools
+    dependency-version: 82.0.1
+    dependency-type: direct:production
+    update-type: version-update:semver-patch
+    dependency-group: python-packages
+  ...
 
 
 0.61.5 (2026-02-18)
 -------------------
-------------------------
 - Fix empty repository crash due to None timestamp comparison (#489)
   [Rodos]
 
