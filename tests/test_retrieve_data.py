@@ -1,6 +1,7 @@
 """Tests for retrieve_data function."""
 
 import json
+import logging
 import socket
 from unittest.mock import Mock, patch
 from urllib.error import HTTPError, URLError
@@ -353,6 +354,33 @@ class TestMakeRequestWithRetry:
         assert (
             call_count == DEFAULT_MAX_RETRIES + 1
         )  # 1 initial + 5 retries = 6 attempts
+
+
+class TestRetrieveGraphqlDataLogging:
+    """Tests for GraphQL request logging."""
+
+    def test_logs_graphql_context(self, create_args, caplog):
+        args = create_args(token_classic="fake_token")
+        mock_response = Mock()
+        mock_response.getcode.return_value = 200
+        mock_response.read.return_value = json.dumps({"data": {}}).encode("utf-8")
+        mock_response.headers = {"x-ratelimit-remaining": "5000"}
+
+        caplog.set_level(logging.INFO, logger="github_backup.github_backup")
+        with patch(
+            "github_backup.github_backup.make_request_with_retry",
+            return_value=mock_response,
+        ):
+            github_backup.retrieve_graphql_data(
+                args,
+                "query { viewer { login } }",
+                log_context="discussion owner/repo#1",
+            )
+
+        assert (
+            "Requesting https://api.github.com/graphql (discussion owner/repo#1)"
+            in caplog.text
+        )
 
 
 class TestRetrieveDataThrottling:
