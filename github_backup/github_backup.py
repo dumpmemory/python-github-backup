@@ -717,11 +717,12 @@ def calculate_retry_delay(attempt, headers):
     return delay + random.uniform(0, delay * 0.1)
 
 
-def retrieve_data(args, template, query_args=None, paginated=True):
+def retrieve_data(args, template, query_args=None, paginated=True, lazy=False):
     """
     Fetch the data from GitHub API.
 
-    Handle both single requests and pagination with yield of individual dicts.
+    Handle both single requests and pagination. Returns a list by default, or
+    a generator when lazy=True so callers can stop before fetching every page.
     Handles throttling, retries, read errors, and DMCA takedowns.
     """
     query_args = query_args or {}
@@ -850,6 +851,9 @@ def retrieve_data(args, template, query_args=None, paginated=True):
                 )
             ):
                 break  # No more data
+
+    if lazy:
+        return fetch_all()
 
     return list(fetch_all())
 
@@ -2229,7 +2233,7 @@ def retrieve_discussion_summaries(args, repository, since=None):
             if updated_at and (newest_seen is None or updated_at > newest_seen):
                 newest_seen = updated_at
 
-            if since and updated_at and updated_at < since:
+            if since and updated_at and updated_at <= since:
                 stop = True
                 break
 
@@ -2650,26 +2654,28 @@ def backup_pulls(args, repo_cwd, repository, repos_template):
             newest_pull_update = updated_at
 
     def pull_is_due_for_repository_checkpoint(pull):
-        return not repository_since or pull["updated_at"] >= repository_since
+        return not repository_since or pull["updated_at"] > repository_since
 
     if not args.include_pull_details:
         pull_states = ["open", "closed"]
         for pull_state in pull_states:
             query_args["state"] = pull_state
-            _pulls = retrieve_data(args, _pulls_template, query_args=query_args)
-            for pull in _pulls:
+            for pull in retrieve_data(
+                args, _pulls_template, query_args=query_args, lazy=True
+            ):
                 track_newest_pull_update(pull)
-                if pulls_since and pull["updated_at"] < pulls_since:
+                if pulls_since and pull["updated_at"] <= pulls_since:
                     break
-                if not pulls_since or pull["updated_at"] >= pulls_since:
+                if not pulls_since or pull["updated_at"] > pulls_since:
                     pulls[pull["number"]] = pull
     else:
-        _pulls = retrieve_data(args, _pulls_template, query_args=query_args)
-        for pull in _pulls:
+        for pull in retrieve_data(
+            args, _pulls_template, query_args=query_args, lazy=True
+        ):
             track_newest_pull_update(pull)
-            if pulls_since and pull["updated_at"] < pulls_since:
+            if pulls_since and pull["updated_at"] <= pulls_since:
                 break
-            if not pulls_since or pull["updated_at"] >= pulls_since:
+            if not pulls_since or pull["updated_at"] > pulls_since:
                 if pull_is_due_for_repository_checkpoint(pull):
                     pulls[pull["number"]] = retrieve_data(
                         args,
@@ -2913,7 +2919,12 @@ def backup_releases(args, repo_cwd, repository, repos_template, include_assets=F
             written_count += 1
 
         if include_assets and not skip_assets:
-            assets = retrieve_data(args, release["assets_url"])
+            # The releases list API already includes release asset metadata. Use
+            # it to avoid an extra /releases/{id}/assets request per release.
+            # Keep a fallback for older/enterprise responses that might omit it.
+            assets = release.get("assets")
+            if assets is None:
+                assets = retrieve_data(args, release["assets_url"])
             if len(assets) > 0:
                 # give release asset files somewhere to live & download them (not including source archives)
                 release_assets_cwd = os.path.join(release_cwd, release_name_safe)
