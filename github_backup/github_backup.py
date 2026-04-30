@@ -6,7 +6,6 @@ import argparse
 import base64
 import calendar
 import codecs
-import errno
 import json
 import logging
 import os
@@ -127,13 +126,7 @@ def logging_subprocess(
 
 def mkdir_p(*args):
     for path in args:
-        try:
-            os.makedirs(path)
-        except OSError as exc:  # Python >2.5
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
+        os.makedirs(path, exist_ok=True)
 
 
 def mask_password(url, secret="*****"):
