@@ -545,7 +545,7 @@ def get_auth(args, encode=True, for_git_cli=False):
         )
     elif args.token_fine:
         if args.token_fine.startswith(FILE_URI_PREFIX):
-            args.token_fine = read_file_contents(args.token_fine)
+            args.token_fine = read_first_line(args.token_fine)
 
         if args.token_fine.startswith("github_pat_"):
             auth = args.token_fine
@@ -561,7 +561,7 @@ def get_auth(args, encode=True, for_git_cli=False):
                 )
             args.token_classic = read_token_from_gh_cli(args)
         elif args.token_classic.startswith(FILE_URI_PREFIX):
-            args.token_classic = read_file_contents(args.token_classic)
+            args.token_classic = read_first_line(args.token_classic)
 
         if not args.as_app:
             auth = args.token_classic + ":" + "x-oauth-basic"
@@ -623,7 +623,7 @@ def get_github_host(args):
     return host
 
 
-def read_file_contents(file_uri):
+def read_first_line(file_uri):
     with open(file_uri[len(FILE_URI_PREFIX) :], "rt") as f:
         return f.readline().strip()
 
