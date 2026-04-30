@@ -1298,7 +1298,7 @@ def get_jwt_signed_url_via_markdown_api(url, token, repo_context):
         request.add_header("Content-Type", "application/json")
         request.add_header("Accept", "application/vnd.github+json")
 
-        html = urlopen(request, timeout=30).read().decode("utf-8")
+        html = urlopen(request, context=https_ctx, timeout=30).read().decode("utf-8")
 
         # Parse JWT-signed URL from HTML response
         # Format: <img src="https://private-user-images.githubusercontent.com/...?jwt=..." ...>
@@ -2984,7 +2984,7 @@ def fetch_repository(
     masked_remote_url = mask_password(remote_url)
 
     initialized = subprocess.call(
-        "git ls-remote " + remote_url, stdout=FNULL, stderr=FNULL, shell=True
+        ["git", "ls-remote", remote_url], stdout=FNULL, stderr=FNULL
     )
     if initialized == 128:
         if ".wiki.git" in remote_url:
