@@ -624,7 +624,8 @@ def get_github_host(args):
 
 
 def read_file_contents(file_uri):
-    return open(file_uri[len(FILE_URI_PREFIX) :], "rt").readline().strip()
+    with open(file_uri[len(FILE_URI_PREFIX) :], "rt") as f:
+        return f.readline().strip()
 
 
 def read_token_from_gh_cli(args):
@@ -1964,10 +1965,11 @@ def read_legacy_last_update(args, output_directory):
         return None, None
 
     last_update_path = os.path.join(output_directory, INCREMENTAL_LAST_UPDATE_FILENAME)
-    if os.path.exists(last_update_path):
-        return last_update_path, open(last_update_path).read().strip()
-
-    return last_update_path, None
+    try:
+        with open(last_update_path) as f:
+            return last_update_path, f.read().strip()
+    except FileNotFoundError:
+        return last_update_path, None
 
 
 def read_resource_last_update(args, resource_cwd, legacy_last_update=None):
@@ -1975,13 +1977,13 @@ def read_resource_last_update(args, resource_cwd, legacy_last_update=None):
         return None
 
     last_update_path = os.path.join(resource_cwd, INCREMENTAL_LAST_UPDATE_FILENAME)
-    if os.path.exists(last_update_path):
-        return open(last_update_path).read().strip()
-
-    if legacy_last_update and resource_backup_exists(resource_cwd):
-        return legacy_last_update
-
-    return None
+    try:
+        with open(last_update_path) as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        if legacy_last_update and resource_backup_exists(resource_cwd):
+            return legacy_last_update
+        return None
 
 
 def write_resource_last_update(args, resource_cwd, repository):
@@ -1990,7 +1992,8 @@ def write_resource_last_update(args, resource_cwd, repository):
 
     mkdir_p(resource_cwd)
     last_update_path = os.path.join(resource_cwd, INCREMENTAL_LAST_UPDATE_FILENAME)
-    open(last_update_path, "w").write(get_repository_checkpoint_time(repository))
+    with open(last_update_path, "w") as f:
+        f.write(get_repository_checkpoint_time(repository))
 
 
 def iter_incremental_resource_dirs(output_directory):
@@ -2378,7 +2381,8 @@ def backup_discussions(args, repo_cwd, repository):
     discussions_since = None
     discussion_last_update_path = os.path.join(discussion_cwd, "last_update")
     if args.incremental and os.path.exists(discussion_last_update_path):
-        discussions_since = open(discussion_last_update_path).read().strip()
+        with open(discussion_last_update_path) as f:
+            discussions_since = f.read().strip()
 
     logger.info("Retrieving {0} discussions".format(repository["full_name"]))
     try:
@@ -2464,7 +2468,8 @@ def backup_discussions(args, repo_cwd, repository):
         and newest_seen
         and (not discussions_since or newest_seen > discussions_since)
     ):
-        open(discussion_last_update_path, "w").write(newest_seen)
+        with open(discussion_last_update_path, "w") as f:
+            f.write(newest_seen)
 
     attempted_count = len(summaries) - skipped_count
     if not summaries:
@@ -2601,7 +2606,8 @@ def get_pull_reviews_since(args, pulls_cwd):
         # repository-level checkpoint would otherwise skip old PRs forever.
         return None, None, reviews_last_update_path
 
-    reviews_since = open(reviews_last_update_path).read().strip()
+    with open(reviews_last_update_path) as f:
+        reviews_since = f.read().strip()
     if args_since and reviews_since:
         return min(args_since, reviews_since), reviews_since, reviews_last_update_path
 
@@ -2753,7 +2759,8 @@ def backup_pulls(args, repo_cwd, repository, repos_template):
         and not pull_review_errors
         and (not pull_reviews_since or newest_pull_update > pull_reviews_since)
     ):
-        open(pull_reviews_last_update_path, "w").write(newest_pull_update)
+        with open(pull_reviews_last_update_path, "w") as f:
+            f.write(newest_pull_update)
 
 
 def backup_milestones(args, repo_cwd, repository, repos_template):
