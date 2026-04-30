@@ -480,7 +480,7 @@ def parse_args(args=None):
         "--attachments",
         action="store_true",
         dest="include_attachments",
-        help="download user-attachments from issues, pull requests, and discussions",
+        help="download user-attachments from issues, pull requests, and discussions [*]",
     )
     parser.add_argument(
         "--throttle-limit",

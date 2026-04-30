@@ -22,7 +22,7 @@ Using PIP via PyPI::
 Using PIP via Github (more likely the latest version)::
 
     pip install git+https://github.com/josegonzalez/python-github-backup.git#egg=github-backup
-    
+
 *Install note for python newcomers:*
 
 Python scripts are unlikely to be included in your ``$PATH`` by default, this means it cannot be run directly in terminal with ``$ github-backup ...``, you can either add python's install path to your environments ``$PATH`` or call the script directly e.g. using ``$ ~/.local/bin/github-backup``.*
@@ -249,7 +249,7 @@ Note:  When you run github-backup, you will be asked whether you want to allow "
 Github Rate-limit and Throttling
 --------------------------------
 
-"github-backup" will automatically throttle itself based on feedback from the Github API. 
+"github-backup" will automatically throttle itself based on feedback from the Github API.
 
 Their API is usually rate-limited to 5000 calls per hour. The API will ask github-backup to pause until a specific time when the limit is reset again (at the start of the next hour). This continues until the backup is complete.
 
@@ -325,7 +325,12 @@ Gotchas / Known-issues
 All is not everything
 ---------------------
 
-The ``--all`` argument does not include: cloning private repos (``-P, --private``), cloning forks (``-F, --fork``), cloning starred repositories (``--all-starred``), ``--pull-details``, cloning LFS repositories (``--lfs``), cloning gists (``--gists``) or cloning starred gist repos (``--starred-gists``). See examples for more.
+The ``--all`` argument does not include: downloading attachments from issue and pull request comments (``--attachments``), cloning private repos (``-P, --private``), cloning forks (``-F, --fork``), cloning starred repositories (``--all-starred``), ``--pull-details``, cloning LFS repositories (``--lfs``), cloning gists (``--gists``) or cloning starred gist repos (``--starred-gists``). See examples for more.
+
+Saves nothing if no arguments are passed
+----------------------------------------
+
+At least one argument like ``--all`` or ``--repositories`` is needed for github-backup to actually save data. Without relevant arguments, github-backup fetches some data from GitHub but doesn't put any of it into files.
 
 Starred repository size
 -----------------------
@@ -363,9 +368,9 @@ This means any blocking errors on previous runs can cause missing data in backup
 
 Using (``--incremental-by-files``) will request new data from the API **based on when the file was modified on filesystem**. e.g. if you modify the file yourself you may miss something.
 
-Still saver than the previous version.
+Still safer than the previous version.
 
-Specifically, issues and pull requests are handled like this.
+Incremental backup only changes how issue and pull request data is fetched.
 
 Known blocking errors
 ---------------------
@@ -429,12 +434,12 @@ Github Backup Examples
 
 Backup all repositories, including private ones using a classic token::
 
-    export ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    ACCESS_TOKEN=SOME-GITHUB-TOKEN
     github-backup WhiteHouse --token $ACCESS_TOKEN --organization --output-directory /tmp/white-house --repositories --private
 
 Use a fine-grained access token to backup a single organization repository with everything else (wiki, pull requests, comments, issues etc)::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     ORGANIZATION=docker
     REPO=cli
     # e.g. git@github.com:docker/cli.git
@@ -442,14 +447,14 @@ Use a fine-grained access token to backup a single organization repository with 
 
 Quietly and incrementally backup useful Github user data (public and private repos with SSH) including; all issues, pulls, all public starred repos and gists (omitting "hooks", "releases" and therefore "assets" to prevent blocking). *Great for a cron job.* ::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     GH_USER=YOUR-GITHUB-USER
 
     github-backup -f $FINE_ACCESS_TOKEN --prefer-ssh -o ~/github-backup/ -l error -P -i --all-starred --starred --watched --followers --following --issues --issue-comments --issue-events --pulls --pull-comments --pull-reviews --pull-commits --labels --milestones --security-advisories --discussions --repositories --wikis --releases --assets --attachments --pull-details --gists --starred-gists $GH_USER
-    
+
 Debug an error/block or incomplete backup into a temporary directory. Omit "incremental" to fill a previous incomplete backup. ::
 
-    export FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
+    FINE_ACCESS_TOKEN=SOME-GITHUB-TOKEN
     GH_USER=YOUR-GITHUB-USER
 
     github-backup -f $FINE_ACCESS_TOKEN -o /tmp/github-backup/ -l debug -P --all-starred --starred --watched --followers --following --issues --issue-comments --issue-events --pulls --pull-comments --pull-reviews --pull-commits --labels --milestones --discussions --repositories --wikis --releases --assets --pull-details --gists --starred-gists $GH_USER
