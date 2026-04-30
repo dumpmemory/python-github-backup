@@ -1,9 +1,65 @@
 Changelog
 =========
 
-0.62.0 (2026-04-29)
+0.62.1 (2026-04-30)
 -------------------
 ------------------------
+- Document that nothing is saved by default. [Changaco]
+- Eliminate trailing spaces. [Changaco]
+- Remove pointless and unsafe `export`s in examples. [Changaco]
+- Try to clarify what `--incremental` actually does. [Changaco]
+- Fix a typo in the README. [Changaco]
+- Document that `--all` doesn't imply `--attachments` [Changaco]
+- Rename a function to match what it actually does. [Changaco]
+- Don't leave files open. [Changaco]
+- Remove legacy code in `mkdir_p` function. [Changaco]
+- Don't pass stdin when doing so can't do any good. [Changaco]
+
+  When the child process doesn't inherit stderr, it can't ask the user for input, so it shouldn't inherit stdin either.
+- Use `subprocess.DEVNULL` instead of emulating it. [Changaco]
+- Remove bad invocation of the system shell. [Changaco]
+- Add missing `context` argument to `urlopen` call. [Changaco]
+- Suppress output of call to `git lfs version` [Changaco]
+- Handle more network errors. [Changaco]
+
+  ```python-traceback
+  Traceback (most recent call last):
+    File ".local/bin/github-backup", line 6, in <module>
+      sys.exit(main())
+               ~~~~^^
+    File ".local/share/pipx/venvs/github-backup/lib/python3.14/site-packages/github_backup/cli.py", line 83, in main
+      backup_repositories(args, output_directory, repositories)
+      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File ".local/share/pipx/venvs/github-backup/lib/python3.14/site-packages/github_backup/github_backup.py", line 1845, in backup_repositories
+      backup_pulls(args, repo_cwd, repository, repos_template)
+      ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File ".local/share/pipx/venvs/github-backup/lib/python3.14/site-packages/github_backup/github_backup.py", line 2019, in backup_pulls
+      pulls[number]["commit_data"] = retrieve_data(args, template)
+                                     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File ".local/share/pipx/venvs/github-backup/lib/python3.14/site-packages/github_backup/github_backup.py", line 766, in retrieve_data
+      return list(fetch_all())
+    File ".local/share/pipx/venvs/github-backup/lib/python3.14/site-packages/github_backup/github_backup.py", line 717, in fetch_all
+      response = json.loads(http_response.read().decode("utf-8"))
+                            ~~~~~~~~~~~~~~~~~~^^
+    File "/usr/lib/python3.14/http/client.py", line 500, in read
+      s = self._safe_read(self.length)
+    File "/usr/lib/python3.14/http/client.py", line 648, in _safe_read
+      data = self.fp.read(cursize)
+    File "/usr/lib/python3.14/socket.py", line 725, in readinto
+      return self._sock.recv_into(b)
+             ~~~~~~~~~~~~~~~~~~~~^^^
+    File "/usr/lib/python3.14/ssl.py", line 1304, in recv_into
+      return self.read(nbytes, buffer)
+             ~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/usr/lib/python3.14/ssl.py", line 1138, in read
+      return self._sslobj.read(len, buffer)
+             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  ConnectionResetError: [Errno 104] Connection reset by peer
+  ```
+
+
+0.62.0 (2026-04-29)
+-------------------
 - Skip checkpoint-equal incremental items. [Duncan Ogilvie]
 - Avoid redundant release asset list requests. [Duncan Ogilvie]
 - Reduce unnecessary pull requests with incremental fetching. [Duncan
