@@ -6,7 +6,6 @@ import argparse
 import base64
 import calendar
 import codecs
-import errno
 import json
 import logging
 import os
@@ -40,7 +39,6 @@ from .graphql_queries import (
     DISCUSSION_REPLIES_QUERY,
 )
 
-FNULL = open(os.devnull, "w")
 FILE_URI_PREFIX = "file://"
 logger = logging.getLogger(__name__)
 
@@ -128,13 +126,7 @@ def logging_subprocess(
 
 def mkdir_p(*args):
     for path in args:
-        try:
-            os.makedirs(path)
-        except OSError as exc:  # Python >2.5
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
+        os.makedirs(path, exist_ok=True)
 
 
 def mask_password(url, secret="*****"):
@@ -529,19 +521,18 @@ def get_auth(args, encode=True, for_git_cli=False):
             if platform.system() != "Darwin":
                 raise Exception("Keychain arguments are only supported on Mac OSX")
             try:
-                with open(os.devnull, "w") as devnull:
-                    token = subprocess.check_output(
-                        [
-                            "security",
-                            "find-generic-password",
-                            "-s",
-                            args.osx_keychain_item_name,
-                            "-a",
-                            args.osx_keychain_item_account,
-                            "-w",
-                        ],
-                        stderr=devnull,
-                    ).strip()
+                token = subprocess.check_output(
+                    [
+                        "security",
+                        "find-generic-password",
+                        "-s",
+                        args.osx_keychain_item_name,
+                        "-a",
+                        args.osx_keychain_item_account,
+                        "-w",
+                    ],
+                    stderr=subprocess.DEVNULL,
+                ).strip()
                 token = token.decode("utf-8")
                 auth = token + ":" + "x-oauth-basic"
             except subprocess.SubprocessError:
@@ -554,7 +545,7 @@ def get_auth(args, encode=True, for_git_cli=False):
         )
     elif args.token_fine:
         if args.token_fine.startswith(FILE_URI_PREFIX):
-            args.token_fine = read_file_contents(args.token_fine)
+            args.token_fine = read_first_line(args.token_fine)
 
         if args.token_fine.startswith("github_pat_"):
             auth = args.token_fine
@@ -570,7 +561,7 @@ def get_auth(args, encode=True, for_git_cli=False):
                 )
             args.token_classic = read_token_from_gh_cli(args)
         elif args.token_classic.startswith(FILE_URI_PREFIX):
-            args.token_classic = read_file_contents(args.token_classic)
+            args.token_classic = read_first_line(args.token_classic)
 
         if not args.as_app:
             auth = args.token_classic + ":" + "x-oauth-basic"
@@ -632,8 +623,9 @@ def get_github_host(args):
     return host
 
 
-def read_file_contents(file_uri):
-    return open(file_uri[len(FILE_URI_PREFIX) :], "rt").readline().strip()
+def read_first_line(file_uri):
+    with open(file_uri[len(FILE_URI_PREFIX) :], "rt") as f:
+        return f.readline().strip()
 
 
 def read_token_from_gh_cli(args):
@@ -1783,7 +1775,7 @@ def get_authenticated_user(args):
 
 def check_git_lfs_install():
     exit_code = subprocess.call(
-        ["git", "lfs", "version"],
+        ["git", "lfs", "version"], stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     if exit_code != 0:
@@ -1973,10 +1965,11 @@ def read_legacy_last_update(args, output_directory):
         return None, None
 
     last_update_path = os.path.join(output_directory, INCREMENTAL_LAST_UPDATE_FILENAME)
-    if os.path.exists(last_update_path):
-        return last_update_path, open(last_update_path).read().strip()
-
-    return last_update_path, None
+    try:
+        with open(last_update_path) as f:
+            return last_update_path, f.read().strip()
+    except FileNotFoundError:
+        return last_update_path, None
 
 
 def read_resource_last_update(args, resource_cwd, legacy_last_update=None):
@@ -1984,13 +1977,13 @@ def read_resource_last_update(args, resource_cwd, legacy_last_update=None):
         return None
 
     last_update_path = os.path.join(resource_cwd, INCREMENTAL_LAST_UPDATE_FILENAME)
-    if os.path.exists(last_update_path):
-        return open(last_update_path).read().strip()
-
-    if legacy_last_update and resource_backup_exists(resource_cwd):
-        return legacy_last_update
-
-    return None
+    try:
+        with open(last_update_path) as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        if legacy_last_update and resource_backup_exists(resource_cwd):
+            return legacy_last_update
+        return None
 
 
 def write_resource_last_update(args, resource_cwd, repository):
@@ -1999,7 +1992,8 @@ def write_resource_last_update(args, resource_cwd, repository):
 
     mkdir_p(resource_cwd)
     last_update_path = os.path.join(resource_cwd, INCREMENTAL_LAST_UPDATE_FILENAME)
-    open(last_update_path, "w").write(get_repository_checkpoint_time(repository))
+    with open(last_update_path, "w") as f:
+        f.write(get_repository_checkpoint_time(repository))
 
 
 def iter_incremental_resource_dirs(output_directory):
@@ -2387,7 +2381,8 @@ def backup_discussions(args, repo_cwd, repository):
     discussions_since = None
     discussion_last_update_path = os.path.join(discussion_cwd, "last_update")
     if args.incremental and os.path.exists(discussion_last_update_path):
-        discussions_since = open(discussion_last_update_path).read().strip()
+        with open(discussion_last_update_path) as f:
+            discussions_since = f.read().strip()
 
     logger.info("Retrieving {0} discussions".format(repository["full_name"]))
     try:
@@ -2473,7 +2468,8 @@ def backup_discussions(args, repo_cwd, repository):
         and newest_seen
         and (not discussions_since or newest_seen > discussions_since)
     ):
-        open(discussion_last_update_path, "w").write(newest_seen)
+        with open(discussion_last_update_path, "w") as f:
+            f.write(newest_seen)
 
     attempted_count = len(summaries) - skipped_count
     if not summaries:
@@ -2610,7 +2606,8 @@ def get_pull_reviews_since(args, pulls_cwd):
         # repository-level checkpoint would otherwise skip old PRs forever.
         return None, None, reviews_last_update_path
 
-    reviews_since = open(reviews_last_update_path).read().strip()
+    with open(reviews_last_update_path) as f:
+        reviews_since = f.read().strip()
     if args_since and reviews_since:
         return min(args_since, reviews_since), reviews_since, reviews_last_update_path
 
@@ -2762,7 +2759,8 @@ def backup_pulls(args, repo_cwd, repository, repos_template):
         and not pull_review_errors
         and (not pull_reviews_since or newest_pull_update > pull_reviews_since)
     ):
-        open(pull_reviews_last_update_path, "w").write(newest_pull_update)
+        with open(pull_reviews_last_update_path, "w") as f:
+            f.write(newest_pull_update)
 
 
 def backup_milestones(args, repo_cwd, repository, repos_template):
@@ -2984,7 +2982,8 @@ def fetch_repository(
     masked_remote_url = mask_password(remote_url)
 
     initialized = subprocess.call(
-        ["git", "ls-remote", remote_url], stdout=FNULL, stderr=FNULL
+        ["git", "ls-remote", remote_url], stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     if initialized == 128:
         if ".wiki.git" in remote_url:
