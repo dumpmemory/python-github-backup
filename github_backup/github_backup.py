@@ -1782,7 +1782,10 @@ def get_authenticated_user(args):
 
 
 def check_git_lfs_install():
-    exit_code = subprocess.call(["git", "lfs", "version"])
+    exit_code = subprocess.call(
+        ["git", "lfs", "version"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
     if exit_code != 0:
         raise Exception(
             "The argument --lfs requires you to have Git LFS installed.\nYou can get it from https://git-lfs.github.com."
